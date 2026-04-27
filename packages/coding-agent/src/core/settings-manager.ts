@@ -77,6 +77,7 @@ export interface Settings {
 	hideThinkingBlock?: boolean;
 	shellPath?: string; // Custom shell path (e.g., for Cygwin users on Windows)
 	quietStartup?: boolean;
+	checkForUpdates?: boolean; // Check for new versions on npm (set to false for forks)
 	shellCommandPrefix?: string; // Prefix prepended to every bash command (e.g., "shopt -s expand_aliases" for alias support)
 	npmCommand?: string[]; // Command used for npm package lookup/install operations, argv-style (e.g., ["mise", "exec", "node@20", "--", "npm"])
 	collapseChangelog?: boolean; // Show condensed changelog after update (use /changelog for full)
@@ -716,6 +717,16 @@ export class SettingsManager {
 	setQuietStartup(quiet: boolean): void {
 		this.globalSettings.quietStartup = quiet;
 		this.markModified("quietStartup");
+		this.save();
+	}
+
+	getCheckForUpdates(): boolean {
+		return this.settings.checkForUpdates ?? true;
+	}
+
+	setCheckForUpdates(enabled: boolean): void {
+		this.globalSettings.checkForUpdates = enabled;
+		this.markModified("checkForUpdates");
 		this.save();
 	}
 

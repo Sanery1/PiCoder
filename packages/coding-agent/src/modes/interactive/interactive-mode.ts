@@ -642,15 +642,16 @@ export class InteractiveMode {
 		await this.init();
 
 		// Start version check asynchronously
+		console.error("[DEBUG] quietStartup:", this.settingsManager.getQuietStartup());
 		this.checkForNewVersion().then((newVersion) => {
-			if (newVersion) {
+			if (newVersion && (this.options.verbose || !this.settingsManager.getQuietStartup())) {
 				this.showNewVersionNotification(newVersion);
 			}
 		});
 
 		// Start package update check asynchronously
 		this.checkForPackageUpdates().then((updates) => {
-			if (updates.length > 0) {
+			if (updates.length > 0 && (this.options.verbose || !this.settingsManager.getQuietStartup())) {
 				this.showPackageUpdateNotification(updates);
 			}
 		});
@@ -718,6 +719,7 @@ export class InteractiveMode {
 	 */
 	private async checkForNewVersion(): Promise<string | undefined> {
 		if (process.env.PI_SKIP_VERSION_CHECK || process.env.PI_OFFLINE) return undefined;
+		if (!this.settingsManager.getCheckForUpdates()) return undefined;
 
 		try {
 			const response = await fetch("https://registry.npmjs.org/@mariozechner/pi-coding-agent/latest", {
@@ -740,6 +742,9 @@ export class InteractiveMode {
 
 	private async checkForPackageUpdates(): Promise<string[]> {
 		if (process.env.PI_OFFLINE) {
+			return [];
+		}
+		if (!this.settingsManager.getCheckForUpdates()) {
 			return [];
 		}
 
